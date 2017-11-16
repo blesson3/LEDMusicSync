@@ -2,7 +2,7 @@
 
 FASTLED_USING_NAMESPACE
 
-// Strawberry project on arduino aims to implement a protocol
+// The LEDMusicSync project on arduino aims to implement a protocol
 // through serial input for controlling individually addressable 
 // LED strips.
 
