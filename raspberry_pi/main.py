@@ -44,6 +44,9 @@ start = time.time()
 oIdx = 0
 flashData = '1|0,4|r|30|&'
 
+ser.write(flashData)
+print("Initial flash!")
+
 while oIdx < len(onsets):
   if start + onsets[oIdx] <= time.time():
     ser.write(flashData)
