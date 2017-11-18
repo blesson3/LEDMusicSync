@@ -40,12 +40,12 @@ time.sleep(1)
 
 print("begin!")
 
-start = datetime.datetime.now()
+start = time.time()
 oIdx = 0
 flashData = '1|0,4|r|30|&'
 
 while oIdx < len(onsets):
-  if start.time() + onsets[oIdx] <= datetime.datetime.now().time():
+  if start + onsets[oIdx] <= time.time():
     ser.write(flashData)
     print("Flash!")
     oIdx += 1
