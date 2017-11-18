@@ -45,7 +45,7 @@ oIdx = 0
 flashData = '1|0,4|r|30|&'
 
 while oIdx < len(onsets):
-  if start + onsets[oIdx] <= datetime.datetime.now():
+  if start.time() + onsets[oIdx] <= datetime.datetime.now().time():
     ser.write(flashData)
     print("Flash!")
     oIdx += 1
