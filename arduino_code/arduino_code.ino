@@ -14,7 +14,7 @@ FASTLED_USING_NAMESPACE
 #endif
 
 #define DATA_PIN    5
-#define LED_TYPE    WS2811
+#define LED_TYPE    SK6812
 #define COLOR_ORDER GRB
 #define NUM_LEDS    100
 CRGB leds[NUM_LEDS];
@@ -33,7 +33,7 @@ void processLEDData(char data[]);
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   
   delay(3000); // 3 second delay for power recovery
 
@@ -48,38 +48,30 @@ void setup() {
 }
 
 void loop()
-{
+{  
+  if (Serial.available()) {
 
-  // always fade the LEDs in every loop
-  for (int i = 0; i < NUM_LEDS; i++) {
-    leds[i].fadeToBlackBy(currentFadeDelta); // 50
-  }
-  
-  while (Serial.available() > 0) {
-    
-    
     char c = Serial.read();
-    Serial.println(c);
-    //dataBuffer[inBufferIndex] = c;
-    //inBufferIndex++;
-//    delay(1);
+    dataBuffer[inBufferIndex] = c;
+    inBufferIndex++;
 
     // look for the end of command signal
-//    if (c == '&') {
-////      Serial.println("-----------------------");
-////      for (int i = 0; i < inBufferIndex; i++) {
-////        Serial.println(dataBuffer[i]);
-////      }
-////      processLEDData(dataBuffer); 
-//      clearDataBuffer();
-//      Serial.println("--done--");
-//    }
+    if (c == '&') {
+      processLEDData(dataBuffer); 
+      clearDataBuffer();
+    }
   }
 
-  // send the 'leds' array out to the actual LED strip
-  FastLED.show();
+  // send the 'leds' array out to the actual LED strip  
   // insert a delay to keep the framerate modest
-//  FastLED.delay(1000/FRAMES_PER_SECOND); 
+  EVERY_N_MILLISECONDS(1000/FRAMES_PER_SECOND) {
+    // always fade the LEDs in every loop
+    for (int i = 0; i < NUM_LEDS; i++) {
+      leds[i].fadeToBlackBy(currentFadeDelta); // 50  currentFadeDelta
+    }
+    
+    FastLED.show();
+  }
 }
 
 void clearDataBuffer() {
@@ -98,12 +90,12 @@ void processLEDData(char data[]) {
   String members[13];
   split(data, '|', members);
 
-  Serial.println("Members:");
-  for (int i = 0; i < 13; i++) {
-    Serial.println(members[i]);
-  }
-  Serial.println("printed all members.");
-  Serial.println("\n");
+//  Serial.println("Members:");
+//  for (int i = 0; i < 13; i++) {
+//    Serial.println(members[i]);
+//  }
+//  Serial.println("printed all members.");
+//  Serial.println("\n");
 
   // get indexes of leds we will be messing with
   int ledIndexes[NUM_LEDS];
@@ -115,9 +107,14 @@ void processLEDData(char data[]) {
     
     int startIndex = comps[0].toInt();
     int len = comps[1].toInt();
-    for (int j = startIndex; j < startIndex+len; j++) {
+    for (int j = startIndex; j <= startIndex+len; j++) {
       ledIndexes[ledIndexesIdx++] = j;
     }
+  }
+
+  if (ledIndexesIdx == 0 || numSections == 0) {
+    Serial.write("0"); // print error
+    return;
   }
 
   // get the color
@@ -136,8 +133,7 @@ void processLEDData(char data[]) {
     color = CRGB::White;
   }
   else {
-    Serial.write("\nColor not recognized: ");
-    Serial.write(colorChar);
+    Serial.write("0"); // print error
     return;
   }
 
@@ -145,21 +141,27 @@ void processLEDData(char data[]) {
 //  String fadeDeltaString = members[numSections+2];
 //  fadeDeltaString.remove(fadeDeltaString.length()-1);
   int fadeDelta = members[numSections+2].toInt();
+  if (fadeDelta == 0) {
+    Serial.write("0"); // print error
+    return;
+  }
   currentFadeDelta = fadeDelta;
 
-  Serial.write("\nSections:");
-  Serial.write(numSections);
-  Serial.write(members[0].charAt(0));
-  Serial.write("\nColor:");
-  Serial.write(colorChar);
-  Serial.write("\nFade Delta:");
-  Serial.write(fadeDelta);
+//  Serial.write("\nSections:");
+//  Serial.write(numSections);
+//  Serial.write(members[0].charAt(0));
+//  Serial.write("\nColor:");
+//  Serial.write(colorChar);
+//  Serial.write("\nFade Delta:");
+//  Serial.write(fadeDelta);
   
 
   for (int i = 0; i < ledIndexesIdx-1; i++) {
     int idx = ledIndexes[i];
     leds[idx] = color;
   }
+
+  Serial.write("1");
 
   // first char is color (simple binary representation for RGB)
   // 0 = 000
