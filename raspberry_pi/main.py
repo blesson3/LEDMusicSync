@@ -6,7 +6,7 @@ import datetime
 #from pygame import mixer # Load the required library
 
 # connect to the arduino through serial...
-ser = serial.Serial('/dev/ttyUSB0', 115200)
+ser = serial.Serial('/dev/ttyACM0', 115200)
 
 # wait to boot
 print("Waiting for Arduino to boot...") 
