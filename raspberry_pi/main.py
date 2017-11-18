@@ -53,7 +53,8 @@ while oIdx < len(onsets):
     print("Flash!")
     oIdx += 1
   
-  # if ser.read() == '0':
-  #   # resend the flash
-  #   ser.write(flashData)
-  #   print("Flash redo!")
+  if ser.in_waiting:
+    print("Serial out: "+ser.read());
+    # resend the flash
+    # ser.write(flashData)
+    # print("Flash redo!")
