@@ -90,13 +90,6 @@ void processLEDData(char data[]) {
   String members[13];
   split(data, '|', members);
 
-//  Serial.println("Members:");
-//  for (int i = 0; i < 13; i++) {
-//    Serial.println(members[i]);
-//  }
-//  Serial.println("printed all members.");
-//  Serial.println("\n");
-
   // get indexes of leds we will be messing with
   int ledIndexes[NUM_LEDS];
   int ledIndexesIdx = 0;
